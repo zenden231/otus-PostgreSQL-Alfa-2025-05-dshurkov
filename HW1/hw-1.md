@@ -80,26 +80,36 @@ tps = 466.769750 (without initial connection time)
 ВЫВОД: после настройки vacuum/autovacuum производительность на примере бенчмарка немного увеличилась - длительность транзакции в 1 секунду (tps) уменьшилась ( в рамках стандартного отклонения можно считать, что осталась на прежнем уровне)
 
 5. Создать таблицу с текстовым полем и заполнить случайными или сгенерированными данным в размере 1млн строк.
+```
 create table testTable as 
 select 
   generate_series(1,1000000) as id,
   md5(random()::text)::char(12) as data;
-
-  размер файла с таблицей: 
+```
+  
+размер файла с таблицей: 
+```
   SELECT pg_size_pretty(pg_total_relation_size('testTable'));
+``` 
+
+```
  pg_size_pretty
 ----------------
  50 MB
 (1 row)
+```
 
 6. 5 раз обновить все строчки 
+```
 update testTable set data = 'testData1';
 update testTable set data = 'testData2';
 update testTable set data = 'testData3';
 update testTable set data = 'testData4';
 update testTable set data = 'testData5';
+```
 
 количество мертвых строк в таблице: 
+```
 select c.relname,
 current_setting('autovacuum_vacuum_threshold') as av_base_thresh,
 current_setting('autovacuum_vacuum_scale_factor') as av_scale_factor,
@@ -109,27 +119,36 @@ s.n_dead_tup
 from pg_stat_user_tables s join pg_class c ON s.relname = c.relname
 where s.n_dead_tup > (current_setting('autovacuum_vacuum_threshold')::int
 + (current_setting('autovacuum_vacuum_scale_factor')::float * c.reltuples));
+```
 
-результат: 
+результат:
+``` 
  relname | av_base_thresh | av_scale_factor | av_thresh | n_dead_tup
 ---------+----------------+-----------------+-----------+------------
 (0 rows)
+```
 
 7. отлкючить автовакуум на таблице
+```
 ALTER TABLE testTable SET (autovacuum_enabled = off);
+```
 
 5 раз обновить все строчки 
+```
 update testTable set data = 'testData1';
 update testTable set data = 'testData2';
 update testTable set data = 'testData3';
 update testTable set data = 'testData4';
 update testTable set data = 'testData5';
+```
 
 мертвые строки: 
+```
   relname  | av_base_thresh | av_scale_factor | av_thresh | n_dead_tup
 -----------+----------------+-----------------+-----------+------------
  testtable | 25             | 0.05            |     50025 |    4999371
  (1 row)
+ ```
 
 
 Пояснение: 
