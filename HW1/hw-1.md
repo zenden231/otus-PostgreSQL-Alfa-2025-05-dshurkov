@@ -41,6 +41,25 @@ tps = 457.021846 (without initial connection time)
 ```
 
 3. настройка vacuum/autovacuum
+```
+изменим значения параметров вручную в файле (целевые показатели): 
+vacuum_cost_page_miss= 5
+vacuum_cost_page_dirty=10
+```
+
+```
+изменим значения параметров вручную в файле (целевые показатели): 
+autovacuum_max_workers= 10
+autovacuum_naptime= 15s
+autovacuum_vacuum_threshold= 25
+autovacuum_vacuum_scale_factor= 0.05
+autovacuum_vacuum_cost_delay= 10
+autovacuum_vacuum_cost_limit= 1000
+```
+
+после изменения настроек в файле выполнен рестарт контейнера (пояснение: при создании контейнера базовый кластер включен в докер файл и не отображается при выполнении команды pg_lsclusters) 
+
+результат после рестарта: 
 vacuum: SELECT name, setting, context, short_desc FROM pg_settings WHERE name like 'vacuum%';
 ![alt text](image.png)
 
