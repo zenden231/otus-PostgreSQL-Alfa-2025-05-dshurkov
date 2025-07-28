@@ -74,6 +74,18 @@ tail -n 10 /var/lib/postgresql/data/log/postgresql-2025-07-28_133223.log
  ```
 
 4. блокировка 3 транзакций
+запустим в 3 сеансах 3 транзакции незакоммиченные
+```
+BEGIN;
+UPDATE testDb SET amount = 3 WHERE i = 1;
+
+BEGIN;
+UPDATE testDb SET amount = 1 WHERE i = 1;
+
+BEGIN;
+UPDATE testDb SET amount = 2 WHERE i = 1;
+```
+
 ```
 locktype    | database | relation | page | tuple | virtualxid | transactionid | classid | objid | objsubid | virtualtransaction | pid |       mode       | granted | fastpath |           waitstart
 ---------------+----------+----------+------+-------+------------+---------------+---------+-------+----------+--------------------+-----+------------------+---------+----------+-------------------------------
